@@ -36,6 +36,13 @@ exports.facebook=function(req, res) {
 			return;
 		}
 
+		// once we know this is valid, we need to try and
+		// look up one of our user records with their facebook ID
+
+		// if we can't find one, we need to send back a 404
+		// so the client knows this *WAS* a valid Facebook token,
+		// but the user isn't present on our system.
+
 		var tokenSet=auth.TokenSetForCredential(user.id, req.params.access_token, 604800000);
 
 		res.send(tokenSet);

@@ -7,10 +7,12 @@
     "request" : "2.x",
     "async": "~0.2.9",
     "underscore": "~1.5.2",
-    "dotenv": "0.0.3",
+    "dotenv": "0.2.x",
     "passport": "0.2.x",
     "jwt-simple": "0.1.x",
-    "facebook-node-sdk":"0.2.0"
+    "facebook-node-sdk":"0.2.0",
+    "mongoose" : "3.x",
+    "redis" : "~0.10.0"
   },
   "engines": {
     "node": ">=0.10.22",
