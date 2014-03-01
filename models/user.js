@@ -8,7 +8,12 @@ var userSchema=new Schema({
 	pictureURL: String,
 	rating: Number,
 	signed_up: { type: Date, default: Date.now },
-	facebook_user_id: String
+	gender: String,
+	social_connection: [
+	{
+		type: {type: String},
+		user_id: String
+	}]
 });
 
 userSchema.methods.getBeacon=function(cb) {

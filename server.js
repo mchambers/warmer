@@ -2,23 +2,18 @@ dotenv = require('dotenv');
 dotenv.load();
 
 var express=require("express"),
-	fs=require('fs'),
-	logger=require('./services/logger'),
-	auth=require("./controllers/auth"),
-	scans=require("./controllers/scans"),
-	sightings=require("./controllers/sightings"),
-	thumbs=require("./controllers/thumbs"),
-	users=require("./controllers/users"),
-	userService=require('./services/users'),
-	authService=require('./services/jwt-auth'),
-	permissionService=require('./services/permissions'),
-	beaconsService=require('./services/beacons');
-
-var app=express();
+	fs=require('fs');
 
 var env = process.env.NODE_ENV || 'development', 
 	config = require('./config/config')[env],
 	mongoose = require('mongoose');
+
+var ensureDevelopmentEnv=function(req, res, next) {
+	if(env=='development') 
+		next();
+	else
+		res.send(500);
+};
 
 var connectDB = function () {
 	var options = { server: { socketOptions: { keepAlive: 1 } } }
@@ -41,11 +36,30 @@ mongoose.connection.on('connected', function (){
 	logger.log("Connected to Mongo DB", "Mongo");
 });
 
-// Bootstrap models
-var models_path = __dirname + '/models'
-fs.readdirSync(models_path).forEach(function (file) {
-  if (~file.indexOf('.js')) require(models_path + '/' + file)
-})
+// load models
+var paths=[
+	"/models",
+];
+
+for(var i=0; i<paths.length; i++)
+{
+	var path=__dirname+paths[i];
+	fs.readdirSync(path).forEach(function(file) {
+		require(path+"/"+file);
+	});
+}
+
+// load services and controllers
+var	logger=require('./services/logger'),
+	auth=require("./controllers/auth"),
+	scans=require("./controllers/scans"),
+	sightings=require("./controllers/sightings"),
+	thumbs=require("./controllers/thumbs"),
+	users=require("./controllers/users"),
+	userService=require('./services/users'),
+	authService=require('./services/jwt-auth'),
+	permissionService=require('./services/permissions'),
+	beaconsService=require('./services/beacons');
 
 // auth middleware stack
 var ensurePermitted=[
@@ -54,15 +68,13 @@ var ensurePermitted=[
 	permissionService.EnsurePermissions
 ];
 
-// auth routes
-app.get('/api/auth/facebook', auth.facebook);
+// instantiate app
+var app=express();
 
-// test routes
-app.get('/test/getnextavailablebeacon', function(req, res) {
-	beaconsService.GetNextAvailable(function(beacon) {
-		res.send(beacon);
-	});
-});
+app.use(express.json());
+
+// auth routes
+app.get('/api/auth/facebook', auth.facebook);										// XX
 
 // user routes
 app.post('/api/users', authService.EnsureNotAuthenticated, users.create);
@@ -78,6 +90,19 @@ app.get('/api/sightings', ensurePermitted, sightings.getPending);
 
 // scan routes
 app.post('/api/scan', ensurePermitted, scans.begin);
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// test routes !!!
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+app.get('/test/getnextavailablebeacon', ensureDevelopmentEnv, function(req, res) {
+	beaconsService.GetNextAvailable(function(beacon) {
+		res.send(beacon);
+	});
+});
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var port=(process.env.PORT || 3000);
 

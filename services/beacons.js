@@ -67,8 +67,11 @@ var Beacons={
 			});
 		};
 
+		// note: we're not actually doing this right now.
 		var verifyAvailability=function(beacon, verifyCb) {
 			var isAvailable=false;
+
+			logger.log("Verifying availability of the selected beacon", "Beacons");
 
 			redis.client.get(redis.beaconKey(beacon.major, beacon.minor), function(err, repl) {
 				if(!repl || err)
