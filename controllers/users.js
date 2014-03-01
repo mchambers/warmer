@@ -31,7 +31,29 @@ exports.create=function(req,res) {
 };
 
 exports.updateById=function(req,res) {
-
+	User.findById(req.params.userId, function(err, user) {
+		if(err)
+		{
+			res.send(400);
+		}
+		else
+		{
+			for(var k in req.body)
+			{
+				user[k]=req.body[k];
+			}
+			user.save(function(err) {
+				if(err)
+				{
+					res.send(500);
+				}
+				else
+				{
+					res.send(200, user);
+				}
+			});
+		}
+	});
 };
 
 exports.findById=function(req, res) {
@@ -42,6 +64,8 @@ exports.findById=function(req, res) {
 		}
 		else
 		{
+			// filter the user based on audience
+			// ...maybe some day
 			if(req.user.id==req.params.userId)
 				res.send(200, user);
 			else

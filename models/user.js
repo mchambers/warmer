@@ -9,6 +9,9 @@ var userSchema=new Schema({
 	rating: Number,
 	signed_up: { type: Date, default: Date.now },
 	gender: String,
+	gender_seeking: String,
+	out_for: String,
+	out_with: String,
 	social_connection: [
 	{
 		type: {type: String},
@@ -21,7 +24,10 @@ userSchema.methods.filter=function() {
 		name: this.name,
 		pictureURL: this.pictureURL,
 		rating: this.rating,
-		gender: this.gender
+		gender: this.gender,
+		gender_seeking: this.gender_seeking,
+		out_for: this.out_for,
+		out_width: this.out_with
 	};
 };
 
