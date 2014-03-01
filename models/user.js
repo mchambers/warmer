@@ -1,5 +1,5 @@
 var mongoose=require('mongoose');
-var redis=require('../modules/redis');
+var redis=require('../services/redis');
 
 var Schema=mongoose.Schema;
 
@@ -32,4 +32,4 @@ userSchema.methods.setBeacon=function(major, minor, cb) {
 	redis.client.set(redis.userBeaconKey(), major+"|"+minor, cb);
 };
 
-module.exports=userSchema;
+mongoose.model("User", userSchema);

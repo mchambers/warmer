@@ -9,6 +9,12 @@ var redisEx={
 	beaconKey: function(major, minor) {
 		return "beacon:"+major+":"+minor;
 	},
+	beaconGlobalMinorKey: function() {
+		return "beacon:minor";
+	},
+	beaconGlobalMajorKey: function() {
+		return "beacon:major";
+	},
 	userThumbKey: function(user1Id, user2Id) {
 		return "user:"+user1Id+":thumb:"+user2Id;
 	},
@@ -22,4 +28,5 @@ var redisEx={
 		return "user:"+user1Id+":sighting:"+user2Id;
 	}
 };
-module.exports=client;
+
+module.exports=redisEx;

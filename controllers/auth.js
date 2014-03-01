@@ -1,4 +1,4 @@
-var auth=require("../modules/jwt-auth");
+var auth=require("../services/jwt-auth");
 var Facebook=require('facebook-node-sdk');
 
 var facebook=new Facebook({
