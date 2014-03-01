@@ -36,10 +36,10 @@ exports.facebook=function(req, res) {
 			res.send(401);
 			return;
 		}
-
+		
 		// once we know this is valid, we need to try and
 		// look up one of our user records with their facebook ID
-
+		
 		// if we don't find an existing user for this FB account,
 		// we just sign them up since that was clearly the intent.
 		

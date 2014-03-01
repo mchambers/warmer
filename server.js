@@ -61,36 +61,45 @@ var	logger=require('./services/logger'),
 	permissionService=require('./services/permissions'),
 	beaconsService=require('./services/beacons');
 
-// auth middleware stack
-var ensurePermitted=[
-	authService.EnsureAuthenticated,
-	userService.LoadUserForRequest,
-	permissionService.EnsurePermissions
-];
-
 // instantiate app
 var app=express();
 
 app.use(express.json());
 
+// auth stacks
+var can={
+	getUser: [authService.EnsureAuthenticated, 
+	userService.LoadUserForRequest, 
+	permissionService.CanGetUser],
+
+	putUser: [authService.EnsureAuthenticated, 
+	userService.LoadUserForRequest, 
+	permissionService.CanPutUser]
+};
+
+var is={
+	authenticated: [authService.EnsureAuthenticated,
+					userService.LoadUserForRequest],
+	notAuthenticated: [authService.EnsureNotAuthenticated]
+};
+
 // auth routes
 app.get('/api/auth/facebook', auth.facebook);										// XX
 
 // user routes
-app.post('/api/users', authService.EnsureNotAuthenticated, users.create);
-app.put('/api/users/:userId', ensurePermitted, users.updateById);
-app.get('/api/users/:userId', ensurePermitted, users.findById);
-app.get('/api/users/:userId/beacon', ensurePermitted, users.findBeaconForUser);
+app.post('/api/users', is.notAuthenticated, users.create);
+app.put('/api/users/:userId', can.putUser, users.updateById);
+app.get('/api/users/:userId', can.getUser, users.findById);
+app.get('/api/users/:userId/beacon', can.getUser, users.findBeaconForUser);
 
 // thumbs routes
-app.post('/api/thumbs', ensurePermitted, thumbs.create);
+app.post('/api/thumbs', is.authenticated, thumbs.create);
 
 // sighting routes
-app.get('/api/sightings', ensurePermitted, sightings.getPending);
+app.get('/api/sightings', is.authenticated, sightings.getPending);
 
 // scan routes
-app.post('/api/scan', ensurePermitted, scans.begin);
-
+app.post('/api/scan', is.authenticated, scans.begin);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

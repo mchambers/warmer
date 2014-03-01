@@ -1,5 +1,6 @@
 var jwt=require('jwt-simple');
 var secret='com.approachlabs.warmer.{B9B039B0-C0B4-4145-9EE9-0B17AF5CFC9C}';
+var moment=require("moment");
 
 var JWTAuth={};
 
@@ -78,11 +79,15 @@ JWTAuth.EnsureAuthenticated=function(req, res, next) {
 
 		// If we can't decode this token properly, it's expired,
 		// or we can't find a username on it, return 401.
+		var today=moment(Date.now);
+		var tokenExpires=moment(decodedToken.expires);
+
 		if(!decodedToken ||
 			 !decodedToken.expires || 
-			 (Date.now > decodedToken.expires) || 
+			 (tokenExpires.isBefore(today)) || 
 			 !decodedToken.username)
 		{
+			console.log(decodedToken);
 			res.send(401, "401 Invalid Access Token");
 			return;
 		}

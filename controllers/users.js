@@ -35,7 +35,19 @@ exports.updateById=function(req,res) {
 };
 
 exports.findById=function(req, res) {
-
+	User.findById(req.params.userId, function(err, user) {
+		if(err)
+		{
+			res.send(404);
+		}
+		else
+		{
+			if(req.user.id==req.params.userId)
+				res.send(200, user);
+			else
+				res.send(200, user.filter());
+		}
+	});
 };
 
 exports.findBeaconForUser=function(req, res) {

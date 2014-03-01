@@ -16,6 +16,15 @@ var userSchema=new Schema({
 	}]
 });
 
+userSchema.methods.filter=function() {
+	return {
+		name: this.name,
+		pictureURL: this.pictureURL,
+		rating: this.rating,
+		gender: this.gender
+	};
+};
+
 userSchema.methods.getBeacon=function(cb) {
 	redis.client.get(redis.userBeaconKey(this.id), function(err, reply) {
 		var ret=null;
