@@ -69,37 +69,43 @@ app.use(express.json());
 // auth stacks
 var can={
 	getUser: [authService.EnsureAuthenticated, 
-	userService.LoadUserForRequest, 
-	permissionService.CanGetUser],
+				userService.LoadUserForRequest, 
+				permissionService.CanGetUser],
 
 	putUser: [authService.EnsureAuthenticated, 
-	userService.LoadUserForRequest, 
-	permissionService.CanPutUser]
+				userService.LoadUserForRequest, 
+				permissionService.CanPutUser],
+
+	thumbUser: [authService.EnsureAuthenticated,
+				userService.LoadUserForRequest,
+				permissionService.CanThumbUser]
 };
 
 var is={
 	authenticated: [authService.EnsureAuthenticated,
 					userService.LoadUserForRequest],
+
 	notAuthenticated: [authService.EnsureNotAuthenticated]
 };
 
 // auth routes
-app.get('/api/auth/facebook', auth.facebook);										// XX
+app.get('/api/auth/facebook', auth.facebook);										// [x]
 
 // user routes
-app.post('/api/users', is.notAuthenticated, users.create);
-app.put('/api/users/:userId', can.putUser, users.updateById);
-app.get('/api/users/:userId', can.getUser, users.findById);
-app.get('/api/users/:userId/beacon', can.getUser, users.findBeaconForUser);
+app.post('/api/users', is.notAuthenticated, users.create);							// [x]
+app.put('/api/users/:userId', can.putUser, users.updateById);						// [x]
+app.get('/api/users/:userId', can.getUser, users.findById);							// [x]
+app.get('/api/users/:userId/beacon', can.getUser, users.findBeaconForUser);			// [x]
 
 // thumbs routes
-app.post('/api/thumbs', is.authenticated, thumbs.create);
+app.post('/api/users/:userId/thumb', can.thumbUser, thumbs.create);					// [ ]
 
-// sighting routes
-app.get('/api/sightings', is.authenticated, sightings.getPending);
+// sightings routes
+app.get('/api/users/:userId/sightings', sightings.getPendingForUser);				// [ ]
+app.post('/api/sightings', sightings.create);
 
 // scan routes
-app.post('/api/scan', is.authenticated, scans.begin);
+app.post('/api/users/:userId/scan', is.authenticated, scans.beginForUser);			// [ ]
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

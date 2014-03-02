@@ -44,8 +44,20 @@ var Beacons={
 		redis.client.setex(redis.beaconKey(beacon.major, beacon.minor), 86400, userId, function(err, reply) {
 			var success=(!err);
 			cb(success);
-	},		});
-
+		});
+	},
+	UserIDAssignedToBeacon: function(beacon, cb) {
+		redis.client.get(redis.beaconKey(beacon.major, beacon.minor), function(err, reply) {
+			if(err || !reply)
+			{
+				cb(null);
+			}
+			else
+			{
+				cb(reply);
+			}
+		});
+	},
 	//
 	//	This should be implemented as a queue of available beacons
 	//	that just gets popped, and if there's nothing left on it,
