@@ -1,5 +1,4 @@
 var mongoose=require('mongoose');
-
 var User=mongoose.model('User');
 
 exports.create=function(req,res) {
@@ -40,8 +39,10 @@ exports.updateById=function(req,res) {
 		{
 			for(var k in req.body)
 			{
-				user[k]=req.body[k];
+				if(k!="social_connections" && k!="id" && k!="_id" && k!="gender")
+					user[k]=req.body[k];
 			}
+
 			user.save(function(err) {
 				if(err)
 				{
@@ -75,5 +76,19 @@ exports.findById=function(req, res) {
 };
 
 exports.findBeaconForUser=function(req, res) {
-
+	User.findById(req.params.userId, function(err, user) {
+		if(err)
+		{
+			res.send(404);
+		}
+		else
+		{
+			user.getBeacon(function(beacon) {
+				if(!beacon)
+					res.send(404);
+				else
+					res.send(200, beacon);
+			});
+		}
+	});
 };

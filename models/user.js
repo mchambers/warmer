@@ -35,7 +35,7 @@ userSchema.methods.getBeacon=function(cb) {
 	redis.client.get(redis.userBeaconKey(this.id), function(err, reply) {
 		var ret=null;
 
-		if(reply)
+		if(reply && !err)
 		{
 			var beaconSplit=reply.split("|");
 			ret={

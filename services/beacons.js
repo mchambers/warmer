@@ -39,6 +39,13 @@ function makeLockToken()
 }
 
 var Beacons={
+	AssignBeaconToUser: function(beacon, userId, cb) {
+		// assign this beacon to this user for 24 hours
+		redis.client.setex(redis.beaconKey(beacon.major, beacon.minor), 86400, userId, function(err, reply) {
+			var success=(!err);
+			cb(success);
+	},		});
+
 	//
 	//	This should be implemented as a queue of available beacons
 	//	that just gets popped, and if there's nothing left on it,
