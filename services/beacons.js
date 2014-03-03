@@ -1,11 +1,19 @@
 // ACD92B22-6D94-4FEA-92E7-E3488D9EFEC3
 
+// this should definitely be refactored into a model
+// just a POCO with static model methods 
+
+// but we CAN'T REFACTOR NOWWWWW can we?
+
 var redis=require('./redis'),
-	logger=require('./logger');
+	logger=require('./logger'),
+	Beacon=require('../models/beacon');
 
 // derp, max 16-bit ints
 var IBEACON_MAX_MAJOR=32767;
 var IBEACON_MAX_MINOR=32767;
+
+var BEACON_DEFAULT_TTL=86400; // one hour
 
 // redis.io -> commands -> set
 // example: "simple lock mechanism"
@@ -41,7 +49,7 @@ function makeLockToken()
 var Beacons={
 	AssignBeaconToUser: function(beacon, userId, cb) {
 		// assign this beacon to this user for 24 hours
-		redis.client.setex(redis.beaconKey(beacon.major, beacon.minor), 86400, userId, function(err, reply) {
+		redis.client.setex(redis.beaconKey(beacon.major, beacon.minor), beacon.ttl, userId, function(err, reply) {
 			var success=(!err);
 			cb(success);
 		});
@@ -152,10 +160,7 @@ var Beacons={
 										return;
 									}
 
-									performUnlock({
-										major: 0,
-										minor: 0
-									}, cb);
+									performUnlock(new Beacon(0, 0, BEACON_DEFAULT_TTL), cb);
 							});
 						}
 						else
@@ -167,10 +172,8 @@ var Beacons={
 									return;
 								}
 
-								performUnlock({
-									major: globalMajor,
-									minor: 0
-								}, cb);
+								var nextBeacon=new Beacon(globalMajor, 0, BEACON_DEFAULT_TTL);
+								performUnlock(nextBeacon, cb);
 							});
 						}
 					});
@@ -181,11 +184,8 @@ var Beacons={
 					redis.client.eval([rdGetMajorScript, 1, redis.beaconGlobalMajorKey()], function(err, repl) {
 						console.log(err);
 						var globalMajor=parseInt(repl);
-
-						performUnlock({
-							major: globalMajor,
-							minor: globalMinor
-						}, cb);
+						var nextBeacon=new Beacon(globalMajor, globalMinor, BEACON_DEFAULT_TTL);
+						performUnlock(nextBeacon, cb);
 					});
 				}
 			});

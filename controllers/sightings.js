@@ -2,19 +2,55 @@ var beacons=require('../services/beacons'),
 	mongoose=require('mongoose'),
 	Sighting=mongoose.model('Sighting'),
 	wmUtils=require('../utils/utils'),
-	moment=require('moment');
+	moment=require('moment'),
+	User=mongoose.model('User'),
+	notifications=require('../services/notifications');
 
-exports.getPending=function(req,res) {
+exports.getPendingForUser=function(req,res) {
+	if(!req.userId)
+	{
+		res.send(404);
+	}
 
+	Sighting.find({ userId: req.userId, read: false }).populate("userId sightedUserId").exec(function(err, sightings) {
+		res.send(200, sightings);
+	});
 };
 
-exports.create=function(req,res) {
-	// we'll get a beacon maj/min
-	// we need to look it up with the beacon service,
-	// figure out who owns it,
-	// see if that person has already sighted us,
-	// log that we've sighted them,
+exports.update=function(req,res) {
+	if(!req.body || !(req.body instanceof Array) || !req.userId)
+	{
+		res.send(400);
+		return;
+	}
 
+	var ids=[];
+
+	for(var i=0; i<req.body.length; i++)
+	{
+		if(req.body[i].hasOwnProperty("id"))
+			ids.push(req.body[i].id);
+	}
+
+	var success=function(){
+		res.send(204);
+	};
+
+	if(ids.length>0)
+	{	
+		Sighting.update({ id: {$in: ids} }, { read: true }, function(err, numAffected) {
+			if(err)
+				res.send(500);
+			else
+				success();
+		});	
+	}
+	else
+		success();
+}
+
+// big ol' fat controller method 
+exports.create=function(req,res) {
 	beacons.UserIDAssignedToBeacon({
 		major: req.body.major,
 		minor: req.body.minor
@@ -48,45 +84,63 @@ exports.create=function(req,res) {
 						}
 						else
 						{
-							var sightingOrigin;
-							var sightingRecipient;
-
-							if(wmUtils.coinFlip())
-							{
-								sightingOrigin=req.userId;
-								sightingRecipient=sightedUserId;
-							}
-							else
-							{
-								sightingOrigin=sightedUserId;
-								sightingRecipient=req.userId;
-							}
-
-							var sightingExpiresOn=moment(Date.now).add('minutes', 10);
-
-							var pendingSighting=new Sighting{
-								userId: sightingOrigin,
-								sightedUserId: sightingRecipient,
-								expires: sightingExpiresOn,
-								read: false
-							};
-
-							pendingSighting.save(function(err) {
-								if(err)
+							var sightedUser=User.findById(sightedUserId, function(err, sightedUser) {
+								if(err || !sightedUser)
 								{
-									// oh fuck me
 									res.send(500);
 									return;
 								}
 
-								if(sightingOrigin==req.userId)
+								if(sightedUser.isSightableBy(req.user) && req.user.isSightableBy(sightedUser))
 								{
-									res.send(201, pendingSighting);
+									// <3 <3 <3 :D
+									var sightingOriginId;
+									var sightingRecipientId;
+
+									if(wmUtils.coinFlip())
+									{
+										sightingOriginId=req.userId;
+										sightingRecipientId=sightedUserId;
+									}
+									else
+									{
+										sightingOriginId=sightedUserId;
+										sightingRecipientId=req.userId;
+									}
+
+									var sightingExpiresOn=moment(Date.now).add('minutes', 10);
+
+									var pendingSighting=new Sighting({
+										userId: sightingOriginId,
+										sightedUserId: sightingRecipientId,
+										expires: sightingExpiresOn,
+										read: false
+									});
+
+									pendingSighting.save(function(err) {
+										if(err)
+										{
+											// oh fuck me srsly?
+											res.send(500);
+											return;
+										}
+
+										if(sightingOriginId==req.userId)
+										{
+											res.send(201, pendingSighting);
+										}
+										else
+										{
+											// send an APNS notification to sightingOrigin 
+											notifications.notifyUserOfSighting(sightedUser, sighting, function(success) {
+												res.send(204);
+											});
+										}
+									});
 								}
 								else
 								{
-									// send an APNS notification to sightingOrigin 
-									
+									res.send(204); // eyyyy don't worry about it
 								}
 							});
 						}

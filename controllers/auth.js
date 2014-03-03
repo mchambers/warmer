@@ -48,11 +48,12 @@ exports.facebook=function(req, res) {
 			'social_connection.user_id':user.id}, function(err, our_user) {
 				if(!our_user || err)
 				{
-					console.log("Nobody found for this fella");
+					console.log("FB Auth: Nobody found for this fella");
 
 					var newUser=new User();
 					newUser.name=user.first_name+" "+user.last_name[0]+".";
 					newUser.gender=user.gender;
+					newUser.email=user.email || null;
 					newUser.social_connection.push({
 						type: "facebook",
 						user_id: user.id

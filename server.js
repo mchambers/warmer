@@ -66,6 +66,18 @@ var app=express();
 
 app.use(express.json());
 
+// TODO:
+// Sign requests with a request token that decodes into
+//
+// 	datetime
+//	app_id
+//	user_id if the user is logged in
+//
+// request token is signed with a secret 
+// if the user is logged in and the request token doens't have
+// a user ID, it's not valid. if they're not logged in the user ID
+// cannot be present.
+
 // auth stacks
 var can={
 	getUser: [authService.EnsureAuthenticated, 
@@ -85,27 +97,38 @@ var is={
 	authenticated: [authService.EnsureAuthenticated,
 					userService.LoadUserForRequest],
 
-	notAuthenticated: [authService.EnsureNotAuthenticated]
+	notAuthenticated: [authService.EnsureNotAuthenticated],
+
+	authenticatedForSpecifiedUser: [
+					authService.EnsureAuthenticated,
+					userService.LoadUserForRequest,
+					function(req,res,next) {
+						if(req.user.id===req.userId) 
+							next();
+						else
+							res.send(401);
+					}
+	]
 };
 
 // auth routes
-app.get('/api/auth/facebook', auth.facebook);										// [x]
+app.get('/api/auth/facebook', auth.facebook);															// [x]
 
 // user routes
-app.post('/api/users', is.notAuthenticated, users.create);							// [x]
-app.put('/api/users/:userId', can.putUser, users.updateById);						// [x]
-app.get('/api/users/:userId', can.getUser, users.findById);							// [x]
-app.get('/api/users/:userId/beacon', can.getUser, users.findBeaconForUser);			// [x]
+app.post('/api/users', is.notAuthenticated, users.create);												// [x]
+app.put('/api/users/:userId', can.putUser, users.updateById);											// [x]
+app.get('/api/users/:userId', can.getUser, users.findById);												// [x]
+app.get('/api/users/:userId/beacon', can.getUser, users.findBeaconForUser);								// [x]
 
 // thumbs routes
-app.post('/api/users/:userId/thumb', can.thumbUser, thumbs.create);					// [ ]
+app.post('/api/users/:userId/thumb', can.thumbUser, thumbs.create);										// [ ]
 
 // sightings routes
-app.get('/api/users/:userId/sightings', sightings.getPendingForUser);				// [ ]
-app.post('/api/sightings', sightings.create);
+app.get('/api/users/:userId/sightings', is.authenticatedForSpecifiedUser, sightings.getPendingForUser);	// [x]
+app.post('/api/sightings', sightings.create);															// [x]
 
 // scan routes
-app.post('/api/users/:userId/scan', is.authenticated, scans.beginForUser);			// [ ]
+app.post('/api/users/:userId/scan', is.authenticatedForSpecifiedUser, scans.beginForUser);				// [ ]
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
