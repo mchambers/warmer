@@ -6,8 +6,8 @@ var Schema=mongoose.Schema;
 var THUMB_DEFAULT_TTL=86400;
 
 var thumbSchema=new Schema({
-	userId: String,
-	thumbedUserId: String,
+	userId: { type: Schema.Types.ObjectId, ref: 'User' },
+	thumbedUserId: { type: Schema.Types.ObjectId, ref: 'User' },
 	like: Boolean,
 	scanId: String,
 	createdAt: {type: Date, default: Date.now},

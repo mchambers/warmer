@@ -4,7 +4,7 @@ var redis=require('../services/redis');
 var Schema=mongoose.Schema;
 
 var scanSchema=new Schema({
-	userId: String,
+	userId: { type: Schema.Types.ObjectId, ref: 'User' },
 	startedAt: { type: Date, default: Date.now },
 	device: String,
 	major: Number,
@@ -15,7 +15,7 @@ var scanSchema=new Schema({
 
 // just returns the first one.
 scanSchema.statics.userHasActiveScan=function(uId, cb) {
-	this.findOne({ userID: uId, active: true }, function(err, scan) {
+	this.findOne({ userID: new mongoose.Types.ObjectId(uId), active: true }, function(err, scan) {
 		if(!err && scan)
 			cb(scan);
 		else
@@ -24,7 +24,10 @@ scanSchema.statics.userHasActiveScan=function(uId, cb) {
 };
 
 scanSchema.statics.stopAllForUser=function(uId, cb) {
-	this.update({ userId: uId, active: false }, function(err, numAffected) {
+	var q=this.find({ userId: new mongoose.Types.ObjectId(uId) });
+	q.options={multi: true};
+	q.update({active: false}, function(err, numAffected) {
+		console.log(numAffected);
 		cb((!err));
 	});
 };

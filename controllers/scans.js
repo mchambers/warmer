@@ -31,7 +31,7 @@ module.exports.beginForUser=function(req, res) {
 
 		var beacon=BeaconService.GetNextAvailable(function(beacon) {
 			BeaconService.AssignBeaconToUser(beacon, req.userId, function(success) {
-				req.user.setBeacon(beacon, function(err, reply) {
+				req.user.setBeacon(beacon.major, beacon.minor, function(err, reply) {
 					if(err)
 					{
 						res.send(500);

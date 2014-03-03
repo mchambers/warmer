@@ -14,7 +14,7 @@ exports.getPendingForUser=function(req,res) {
 
 	// we're not populating the userId field here because it'll just be the requester's
 	// user record over and over.
-	Sighting.find({ userId: req.userId, read: false }).populate("sightedUserId").exec(function(err, sightings) {
+	Sighting.find({ userId: new mongoose.Types.ObjectId(req.userId), read: false }).populate("sightedUserId").exec(function(err, sightings) {
 		res.send(200, sightings);
 	});
 };
@@ -40,7 +40,9 @@ exports.update=function(req,res) {
 
 	if(ids.length>0)
 	{	
-		Sighting.update({ id: {$in: ids} }, { read: true }, function(err, numAffected) {
+		var q=Sighting.where({id: $in: ids});
+		q.options={multi: true};
+		q.update({read: true}, function(err, numAffected) {
 			if(err)
 				res.send(500);
 			else
