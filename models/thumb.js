@@ -12,7 +12,7 @@ var thumbSchema=new Schema({
 	scanId: String,
 	createdAt: {type: Date, default: Date.now},
 	ttl: { type: Number, default: THUMB_DEFAULT_TTL },
-	result: String // defer, seek or stand
+	result: String // defer, seek, stand or no_match
 });
 
 thumbSchema.pre('save', function(next) {
@@ -20,7 +20,7 @@ thumbSchema.pre('save', function(next) {
 		this.ttl=THUMB_DEFAULT_TTL;
 
 	var keyVal=(this.like ? "true" : "false");
-	
+
 	redis.client.setex(redis.userThumbKey(this.userId, this.thumbedUserId), this.ttl, keyVal, function(err, reply) {
 		if(!err)
 		{
