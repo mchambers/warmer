@@ -3,6 +3,16 @@ var mongoose=require('mongoose'),
 	Scan=mongoose.model('Scan'),
 	BeaconService=require('../services/beacons');
 
+module.exports.stopForUser=function(req,res) {
+	if(!req.userId)
+	{
+		res.send(400);
+		return;
+	}
+
+	
+};
+
 module.exports.beginForUser=function(req, res) {
 	if(!req.userId)
 	{
@@ -37,10 +47,15 @@ module.exports.beginForUser=function(req, res) {
 						ttl: beacon.ttl,
 						active: true
 					});
+
+					scan.save(function(err) {
+						if(err)
+							res.send(500);
+						else
+							res.send(201, scan);
+					});
 				});
 			});
-
-			
 		});
 	});
 };

@@ -12,7 +12,9 @@ exports.getPendingForUser=function(req,res) {
 		res.send(404);
 	}
 
-	Sighting.find({ userId: req.userId, read: false }).populate("userId sightedUserId").exec(function(err, sightings) {
+	// we're not populating the userId field here because it'll just be the requester's
+	// user record over and over.
+	Sighting.find({ userId: req.userId, read: false }).populate("sightedUserId").exec(function(err, sightings) {
 		res.send(200, sightings);
 	});
 };
