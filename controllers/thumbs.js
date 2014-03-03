@@ -51,7 +51,7 @@ exports.create=function(req, res) {
 							expires: sightingExpiresOn,
 							read: false
 						});
-
+						
 						pendingSighting.save(function(err) {
 							res.send(204);
 
