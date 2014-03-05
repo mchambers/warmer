@@ -4,6 +4,11 @@ var redis=require('./redis'),
 
 var PermissionService={
 	CanGetUser: function(req,res,next) {
+		if(req.params.userId==='me')
+		{
+			req.params.userId=req.userId;
+		}
+		
 		if(req.userId==req.params.userId)
 		{
 			next();

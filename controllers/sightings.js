@@ -40,7 +40,7 @@ exports.update=function(req,res) {
 
 	if(ids.length>0)
 	{	
-		var q=Sighting.where({id: $in: ids});
+		var q=Sighting.where({id: {$in: ids} });
 		q.options={multi: true};
 		q.update({read: true}, function(err, numAffected) {
 			if(err)
