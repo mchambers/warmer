@@ -64,7 +64,7 @@ userSchema.methods.isSightableBy=function(user) {
 	//
 	//	so algorithm
 	//
-	if(this.gender_seeking===user.gender || this.gender_seeking==="either")
+	if(this.gender_seeking==user.gender || this.gender_seeking=="either")
 		return true;
 	return false;
 };
