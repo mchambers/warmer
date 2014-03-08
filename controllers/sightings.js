@@ -4,7 +4,8 @@ var beacons=require('../services/beacons'),
 	wmUtils=require('../utils/utils'),
 	moment=require('moment'),
 	User=mongoose.model('User'),
-	notifications=require('../services/notifications');
+	notifications=require('../services/notifications'),
+	redis=require('../services/redis');
 
 exports.getPendingForUser=function(req,res) {
 	if(!req.userId)
