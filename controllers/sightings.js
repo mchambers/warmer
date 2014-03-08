@@ -15,8 +15,8 @@ exports.getPendingForUser=function(req,res) {
 
 	// we're not populating the userId field here because it'll just be the requester's
 	// user record over and over.
-	Sighting.find({ userId: new mongoose.Types.ObjectId(req.userId), read: false })
-		.populate("sightedUserId", "-email -social_connection -signed_up")
+	Sighting.find({ user: new mongoose.Types.ObjectId(req.userId), read: false })
+		.populate("sightedUser", "-email -social_connection -signed_up")
 		.exec(function(err, sightings) {
 		res.send(200, sightings);
 	});
@@ -125,8 +125,8 @@ exports.create=function(req,res) {
 									var sightingExpiresOn=moment().add('minutes', 10);
 
 									var pendingSighting=new Sighting({
-										userId: sightingOriginId,
-										sightedUserId: sightingRecipientId,
+										user: sightingOriginId,
+										sightedUser: sightingRecipientId,
 										expires: sightingExpiresOn,
 										read: false
 									});

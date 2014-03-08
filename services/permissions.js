@@ -32,8 +32,8 @@ var PermissionService={
 
 		// see if there's a pending sighting we're thumbing against
 		Sighting.findOne({
-			userID: req.userId,
-			sightedUserID: req.params.userId
+			user: req.userId,
+			sightedUser: req.params.userId
 		}, function(err, sighting) {
 			if(err || !sighting) 
 			{
