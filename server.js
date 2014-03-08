@@ -106,7 +106,10 @@ var is={
 						if(req.user.id===req.userId) 
 							next();
 						else
+						{
+							console.log("Failed authForSpecificUser test");
 							res.send(401);
+						}
 					}
 	]
 };

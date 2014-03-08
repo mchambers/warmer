@@ -65,12 +65,14 @@ JWTAuth.EnsureAuthenticated=function(req, res, next) {
 		{
 			accessToken=req.query['access_token'];
 		}
-		else if(req.headers['access_token'])
+		else if(req.headers['authorization'])
 		{
-			accessToken=req.headers['access_token'];
+			var splitAccessToken=null;
+			accessToken=req.headers['authorization'].split(" ")[1] || null;
 		}
 		else
 		{
+			console.log("Missing access token");
 			res.send(401, "401 Missing Access Token");
 			return;
 		}
@@ -88,6 +90,7 @@ JWTAuth.EnsureAuthenticated=function(req, res, next) {
 			 !decodedToken.username)
 		{
 			console.log(decodedToken);
+			console.log("Invalid access token");
 			res.send(401, "401 Invalid Access Token");
 			return;
 		}
