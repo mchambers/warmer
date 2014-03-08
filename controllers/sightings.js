@@ -69,6 +69,7 @@ exports.create=function(req,res) {
 		redis.client.get(redis.userSightingKey(req.userId, sightedUserId), function(err, reply) {
 			if(!err && reply)
 			{
+				console.log(req.userId + " already sighted " + sightedUserId);
 				// already sighted, carry on soldier
 				res.send(200);
 			}
@@ -80,15 +81,19 @@ exports.create=function(req,res) {
 						res.send(500, "Database Failure"); // ugh
 						return;
 					}
+					console.log("flagging "+req.userId + " as having sighted " + sightedUserId);
 
 					redis.client.get(redis.userSightingKey(sightedUserId, req.userId), function(err, reply) {
 						if(!err && reply)
 						{
 							// they've already sighted us, so this is being handled
+							console.log("...but they already sighted us");
 							res.send(204);
 						}
 						else
 						{
+							console.log("let's look up their user");
+
 							var sightedUser=User.findById(sightedUserId, function(err, sightedUser) {
 								if(err || !sightedUser)
 								{
@@ -99,6 +104,8 @@ exports.create=function(req,res) {
 								if(sightedUser.isSightableBy(req.user) && req.user.isSightableBy(sightedUser))
 								{
 									// <3 <3 <3 :D
+									console.log("we are sightable by each other");
+
 									var sightingOriginId;
 									var sightingRecipientId;
 
@@ -145,6 +152,7 @@ exports.create=function(req,res) {
 								}
 								else
 								{
+									console.log("not sightable by each other so move on");
 									res.send(204); // eyyyy don't worry about it
 								}
 							});
