@@ -105,10 +105,10 @@ exports.create=function(req,res) {
 								{
 									// <3 <3 <3 :D
 									console.log("we are sightable by each other");
-
+									
 									var sightingOriginId;
 									var sightingRecipientId;
-
+									
 									if(wmUtils.coinFlip())
 									{
 										sightingOriginId=req.userId;
@@ -149,7 +149,7 @@ exports.create=function(req,res) {
 											console.log("the other user gets the new sighting");
 
 											// send an APNS notification to sightingOrigin 
-											notifications.notifyUserOfSighting(sightedUser, sighting, function(success) {
+											notifications.notifyUserOfSighting(sightedUser, pendingSighting, function(success) {
 												res.send(204);
 											});
 										}
