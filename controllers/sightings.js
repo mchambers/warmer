@@ -15,7 +15,9 @@ exports.getPendingForUser=function(req,res) {
 
 	// we're not populating the userId field here because it'll just be the requester's
 	// user record over and over.
-	Sighting.find({ userId: new mongoose.Types.ObjectId(req.userId), read: false }).populate("sightedUserId").exec(function(err, sightings) {
+	Sighting.find({ userId: new mongoose.Types.ObjectId(req.userId), read: false })
+		.populate("sightedUserId", "-email -social_connection -signed_up")
+		.exec(function(err, sightings) {
 		res.send(200, sightings);
 	});
 };
@@ -105,10 +107,10 @@ exports.create=function(req,res) {
 								{
 									// <3 <3 <3 :D
 									console.log("we are sightable by each other");
-									
+
 									var sightingOriginId;
 									var sightingRecipientId;
-									
+
 									if(wmUtils.coinFlip())
 									{
 										sightingOriginId=req.userId;
