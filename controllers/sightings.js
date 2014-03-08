@@ -120,7 +120,7 @@ exports.create=function(req,res) {
 										sightingRecipientId=req.userId;
 									}
 
-									var sightingExpiresOn=moment(Date.now).add('minutes', 10);
+									var sightingExpiresOn=moment().add('minutes', 10);
 
 									var pendingSighting=new Sighting({
 										userId: sightingOriginId,
