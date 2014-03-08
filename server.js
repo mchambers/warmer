@@ -128,7 +128,7 @@ app.post('/api/users/:userId/thumb', can.thumbUser, thumbs.create);										// 
 
 // sightings routes
 app.get('/api/users/:userId/sightings', is.authenticatedForSpecifiedUser, sightings.getPendingForUser);	// [x]
-app.post('/api/sightings', sightings.create);															// [x]
+app.post('/api/sightings', is.authenticated, sightings.create);											// [x]
 
 // scan routes
 app.post('/api/users/:userId/scan', is.authenticatedForSpecifiedUser, scans.beginForUser);				// [x]
