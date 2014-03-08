@@ -132,7 +132,7 @@ exports.create=function(req,res) {
 									pendingSighting.save(function(err) {
 										if(err)
 										{
-											console.log("error saving the sighting");
+											console.log("error saving the sighting " + err);
 
 											// oh fuck me srsly?
 											res.send(500);
@@ -147,7 +147,7 @@ exports.create=function(req,res) {
 										else
 										{
 											console.log("the other user gets the new sighting");
-											
+
 											// send an APNS notification to sightingOrigin 
 											notifications.notifyUserOfSighting(sightedUser, sighting, function(success) {
 												res.send(204);
